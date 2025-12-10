@@ -1,0 +1,118 @@
+package com.codeWithArslan.UI;
+
+import com.codeWithArslan.Service.UserServices;
+import javax.swing.*;
+import java.awt.*; // Import for Layouts
+
+public class SignUpWindow extends JFrame {
+    // 1. Use JButton (Swing)
+    Button signUp;
+    Button cancel;
+
+    UserServices userServices;
+
+    // Global fields so the listener can access them
+    JTextField username;
+    JPasswordField password;
+    JPasswordField confirmPassword;
+    JTextField name;
+    JComboBox<String> role;
+
+    public SignUpWindow() {
+        userServices = new UserServices();
+
+        this.setTitle("Sign Up");
+        this.setSize(350, 400); // Made slightly taller
+
+        // Initialize Global Variables
+        this.username = new JTextField(30);
+        this.password = new JPasswordField(30);
+        this.confirmPassword = new JPasswordField(30);
+        this.name = new JTextField(30);
+
+
+        JPanel User_NamePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        User_NamePanel.add(new JLabel("Full Name: "));
+        User_NamePanel.add(name);
+
+        JPanel Username_Panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        Username_Panel.add(new JLabel("Username:  "));
+        Username_Panel.add(username);
+
+        JPanel Password_Panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        Password_Panel.add(new JLabel("Password:  "));
+        Password_Panel.add(password);
+
+        JPanel Confirm_Password_Panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        Confirm_Password_Panel.add(new JLabel("Confirm:   "));
+        Confirm_Password_Panel.add(confirmPassword);
+
+        String[] options = new String[]{"Regular Student", "Foreign Admin", "Special Recommendation Student", "Cota Student"};
+        JPanel User_Role_Panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        User_Role_Panel.add(new JLabel("Role: "));
+        role = new JComboBox<>(options);
+        User_Role_Panel.add(role);
+
+        JPanel button_Panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        signUp = new Button("Primary", "Sign Up");
+        cancel = new Button("Secondary","Cancel");
+        button_Panel.add(signUp);
+        button_Panel.add(cancel);
+
+        // --- Add Panels to Frame ---
+        this.setLayout(new BoxLayout(this.getContentPane(), BoxLayout.Y_AXIS));
+        this.add(User_NamePanel);
+        this.add(Username_Panel);
+        this.add(Password_Panel);
+        this.add(Confirm_Password_Panel);
+        this.add(User_Role_Panel);
+        this.add(button_Panel);
+
+        // 2. Call Event Function (NO ARGUMENTS PASSED)
+        SignUpEvent();
+        cancelEvent();
+
+    }
+
+    private void SignUpEvent() {
+        this.signUp.addActionListener(e -> {
+
+            String txtName = this.name.getText();
+            String txtUsername = this.username.getText();
+            String txtPassword = new String(this.password.getPassword());
+            String txtConfirm = new String(this.confirmPassword.getPassword());
+            String txtRole = (String) this.role.getSelectedItem();
+
+
+            if(txtName.isEmpty() || txtUsername.isEmpty() || txtPassword.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please fill complete form", "Form Incomplete", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
+
+            if(!this.userServices.validatePassword(txtPassword, txtConfirm)) {
+                JOptionPane.showMessageDialog(this, "Passwords do not match", "Warning", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            if(this.userServices.get(txtUsername) != null) {
+                JOptionPane.showMessageDialog(this, "User already exists", "Warning", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // 6. INSERT
+            if(this.userServices.insert(txtUsername, txtPassword, txtName, txtRole)) {
+                JOptionPane.showMessageDialog(this, "User Successfully Registered", "Success", JOptionPane.INFORMATION_MESSAGE);
+                this.dispose();
+            } else {
+                JOptionPane.showMessageDialog(this, "Registration Failed", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+    }
+
+    private void cancelEvent() {
+        this.cancel.addActionListener(e -> {
+            this.dispose(); // Use dispose to actually close the window resources
+        });
+    }
+}
