@@ -10,7 +10,7 @@ import java.sql.Statement;
 public class CourseDAO implements Database<Course, String, ResultSet>{
     BuildConnection buildConnection = new BuildConnection();
     @Override
-    public boolean insert(Course obj) {
+    public int insert(Course obj) {
         String courseName = obj.getCourse_name();
         int courseCode = obj.getCourse_code();
         String prerequisiteName = obj.getPrerequisite_name();
@@ -37,16 +37,16 @@ public class CourseDAO implements Database<Course, String, ResultSet>{
             int rowsInserted = ps.executeUpdate();
 
             connection.close();
-            return rowsInserted > 0;   // return true if inserted
+            return rowsInserted > 0 ? 1 : 0;   // return true if inserted
 
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return -1;
         }
     }
 
     @Override
-    public boolean delete(String courseName) {
+    public int delete(String courseName) {
         Connection connection = null;
         try {
             connection = buildConnection.establishConnection();
@@ -55,27 +55,28 @@ public class CourseDAO implements Database<Course, String, ResultSet>{
             ps.setString(1, courseName);
             int rowsDeleted = ps.executeUpdate();
             connection.close();
-            return rowsDeleted > 0;
+            return rowsDeleted > 0 ? 1 : 0;
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return -1;
         }
     }
 
     @Override
-    public boolean update(String updatedVal, String factor, String key) {
+    public int update(String updatedVal, String factor, String key) {
         Connection connection = null;
         try {
             connection = buildConnection.establishConnection();
-            String QUERY = "UPDATE COURSE SET " + factor.toUpperCase() + " = " + updatedVal + " WHERE COURSE_NAME = ?";
+            String QUERY = "UPDATE COURSE SET " + factor.toUpperCase() + " = ?" + " WHERE COURSE_NAME = ?";
             PreparedStatement ps =  connection.prepareStatement(QUERY);
-            ps.setString(1, key);
+            ps.setString(1, updatedVal);
+            ps.setString(2, key);
             int rowsUpdated = ps.executeUpdate();
             connection.close();
-            return rowsUpdated > 0;
+            return rowsUpdated > 0 ? 1 : 0;
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return -1;
         }
     }
 

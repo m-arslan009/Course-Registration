@@ -1,17 +1,18 @@
 package com.codeWithArslan.DAO;
 
+import java.io.FileInputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.util.Properties;
 
 public class BuildConnection {
     Connection connection = null;
-    String url = "jdbc:sqlserver://localhost:1433;database=Course_Registration;encrypt=true;trustServerCertificate=true;";
-    String user = "sa";
-    String password = "12345";
+    Properties prop = new Properties();
 
     public Connection establishConnection() {
-        try  {
-            connection = DriverManager.getConnection(url, user, password);
+        try(FileInputStream in = new FileInputStream("Config.properties");)  {
+            prop.load(in);
+            connection = DriverManager.getConnection(prop.getProperty("db.url"), prop.getProperty("db.user"), prop.getProperty("db.pass"));
         } catch(Exception e) {
             e.printStackTrace();
         }

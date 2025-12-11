@@ -15,7 +15,7 @@ public class UserDAO implements Database<User, String, ResultSet> {
     }
 
     @Override
-    public boolean insert(User obj) {
+    public int insert(User obj) {
         // 1. Get data from object
         String username = obj.getUsername();
         String password = obj.getPassword();
@@ -25,7 +25,7 @@ public class UserDAO implements Database<User, String, ResultSet> {
         Connection connection = null;
         try {
             connection = bc.establishConnection();
-            if (connection == null) return false; // Safety check
+            if (connection == null) return -1; // Safety check
 
             // FIX 1: Table name changed to USERS (USER is reserved keyword)
             // FIX 2: Check your DB columns. Is it 'ROLL' or 'ROLE'? I assumed 'Role' based on your UI.
@@ -39,11 +39,11 @@ public class UserDAO implements Database<User, String, ResultSet> {
             ps.setString(4, role);
 
             int rowsInserted = ps.executeUpdate();
-            return rowsInserted > 0;
+            return rowsInserted > 0 ? 1 : 0;
 
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return -1;
         } finally {
             // Best Practice: Close connection in a finally block
             try { if (connection != null) connection.close(); } catch (SQLException e) { e.printStackTrace(); }
@@ -51,7 +51,7 @@ public class UserDAO implements Database<User, String, ResultSet> {
     }
 
     @Override
-    public boolean update(String updatedVal, String factor, String key) {
+    public int update(String updatedVal, String factor, String key) {
         Connection connection = null;
         try {
             connection = bc.establishConnection();
@@ -62,23 +62,23 @@ public class UserDAO implements Database<User, String, ResultSet> {
             String QUERY = "UPDATE USERS SET " + factor + " = ? WHERE USERNAME = ?";
 
             PreparedStatement ps = connection.prepareStatement(QUERY);
-            ps.setString(1, updatedVal); // The new value
-            ps.setString(2, key);        // The username (WHERE clause)
+            ps.setString(1, updatedVal);
+            ps.setString(2, key);
 
             // FIX 4: Actually Execute the update!
             int rows = ps.executeUpdate();
-            return rows > 0;
+            return rows > 0 ? 1 : 0;
 
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return -1;
         } finally {
             try { if (connection != null) connection.close(); } catch (SQLException e) { e.printStackTrace(); }
         }
     }
 
     @Override
-    public boolean delete(String key) {
+    public int delete(String key) {
         Connection connection = null;
         try {
             connection = bc.establishConnection();
@@ -87,11 +87,11 @@ public class UserDAO implements Database<User, String, ResultSet> {
             ps.setString(1, key);
 
             int rows = ps.executeUpdate();
-            return rows > 0;
+            return rows > 0 ? 1 : 0;
 
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return -1;
         } finally {
             try { if (connection != null) connection.close(); } catch (SQLException e) { e.printStackTrace(); }
         }

@@ -86,7 +86,7 @@ public class SignInWindow extends JFrame {
 
                 UserServices obj = new UserServices();
 
-                boolean isSuccess = obj.login(user, pass);
+                int isSuccess = obj.login(user, pass);
 
                 SwingUtilities.invokeLater(() -> {
 
@@ -95,7 +95,7 @@ public class SignInWindow extends JFrame {
                     this.btnCancel.setEnabled(true);
                     this.progressBar.setVisible(false);
 
-                    if(!isSuccess) {
+                    if(isSuccess == -1) {
                         JOptionPane.showMessageDialog(null, "Invalid Username or Password", "Invalid User", JOptionPane.WARNING_MESSAGE);
                         return;
                     }

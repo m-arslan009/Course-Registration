@@ -19,17 +19,17 @@ public class UserServices {
      * Attempts to log in a user.
      * If successful, sets the static 'currentUser' session.
      */
-    public boolean login(String username, String password) {
+    public int login(String username, String password) {
 
         User dbUser = this.get(username);
 
         if (dbUser != null && dbUser.getPassword().equals(password.trim())) {
             currentUser = dbUser;
-            return true;
+            return 1;
         }
 
         // FAILED
-        return false;
+        return -1;
     }
 
     public void lgout() {
@@ -100,7 +100,7 @@ public class UserServices {
         }
     }
 
-    public boolean insert(String username, String password, String name, String role) {
+    public int insert(String username, String password, String name, String role) {
         User userToInsert = new User();
         userToInsert.setName(name);
         userToInsert.setPassword(password);
@@ -110,11 +110,11 @@ public class UserServices {
         return userDAO.insert(userToInsert);
     }
 
-    public boolean delete(String username) {
+    public int delete(String username) {
         return userDAO.delete(username);
     }
 
-    public boolean update(String updatedVal, String factor, String key) {
+    public int update(String updatedVal, String factor, String key) {
         return userDAO.update(updatedVal, factor, key);
     }
 }

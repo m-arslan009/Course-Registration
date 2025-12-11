@@ -56,7 +56,7 @@ public class CourseServices {
         }
     }
 
-    public boolean insert (String cn, int cc, String pn, int pc, int s, String sd, int seats) {
+    public int insert (String cn, int cc, String pn, int pc, int s, String sd, int seats) {
         Course course = new Course();
         course.setCourse_name(cn);
         course.setCourse_code(cc);
@@ -68,7 +68,7 @@ public class CourseServices {
         return courseDAO.insert(course);
     }
 
-    public boolean delete(String cn) {
+    public int delete(String cn) {
         return courseDAO.delete(cn);
     }
 }

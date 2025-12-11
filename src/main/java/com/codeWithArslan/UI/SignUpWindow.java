@@ -9,17 +9,15 @@ public class SignUpWindow extends JFrame {
     Button signUp;
     Button cancel;
 
-    UserServices userServices;
-
     // Global fields so the listener can access them
     JTextField username;
     JPasswordField password;
     JPasswordField confirmPassword;
     JTextField name;
     JComboBox<String> role;
+    JProgressBar progressBar;
 
     public SignUpWindow() {
-        userServices = new UserServices();
 
         this.setTitle("Sign Up");
         this.setSize(350, 400); // Made slightly taller
@@ -29,6 +27,13 @@ public class SignUpWindow extends JFrame {
         this.password = new JPasswordField(30);
         this.confirmPassword = new JPasswordField(30);
         this.name = new JTextField(30);
+
+        // Initialize Progress Bar
+        this.progressBar = new JProgressBar();
+        this.progressBar.setIndeterminate(true);
+        this.progressBar.setString("Signing Up...");
+        this.progressBar.setStringPainted(true);
+        this.progressBar.setVisible(false);
 
 
         JPanel User_NamePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -44,10 +49,10 @@ public class SignUpWindow extends JFrame {
         Password_Panel.add(password);
 
         JPanel Confirm_Password_Panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        Confirm_Password_Panel.add(new JLabel("Confirm:   "));
+        Confirm_Password_Panel.add(new JLabel("Confirm Password:   "));
         Confirm_Password_Panel.add(confirmPassword);
 
-        String[] options = new String[]{"Regular Student", "Foreign Admin", "Special Recommendation Student", "Cota Student"};
+        String[] options = new String[]{"Regular Student", "Foreign Student", "Special Recommendation Student", "Cota Student"};
         JPanel User_Role_Panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         User_Role_Panel.add(new JLabel("Role: "));
         role = new JComboBox<>(options);
@@ -67,6 +72,7 @@ public class SignUpWindow extends JFrame {
         this.add(Confirm_Password_Panel);
         this.add(User_Role_Panel);
         this.add(button_Panel);
+        this.add(progressBar);
 
         // 2. Call Event Function (NO ARGUMENTS PASSED)
         SignUpEvent();
@@ -89,24 +95,54 @@ public class SignUpWindow extends JFrame {
                 return;
             }
 
+            this.signUp.setText("Creating Account...");
+            this.signUp.setEnabled(false);
+            this.cancel.setEnabled(false);
+            this.progressBar.setVisible(true);
 
-            if(!this.userServices.validatePassword(txtPassword, txtConfirm)) {
-                JOptionPane.showMessageDialog(this, "Passwords do not match", "Warning", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
+            Thread worker = new Thread(() -> {
 
-            if(this.userServices.get(txtUsername) != null) {
-                JOptionPane.showMessageDialog(this, "User already exists", "Warning", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
+                try {
+                    Thread.sleep(1500);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
 
-            // 6. INSERT
-            if(this.userServices.insert(txtUsername, txtPassword, txtName, txtRole)) {
-                JOptionPane.showMessageDialog(this, "User Successfully Registered", "Success", JOptionPane.INFORMATION_MESSAGE);
-                this.dispose();
-            } else {
-                JOptionPane.showMessageDialog(this, "Registration Failed", "Error", JOptionPane.ERROR_MESSAGE);
-            }
+                UserServices userServices = new UserServices();
+
+                boolean validateStatus = userServices.validatePassword(txtPassword.trim(), txtConfirm.trim());
+                boolean isExist = userServices.get(txtUsername.trim()) != null;
+                int status = userServices.insert(txtUsername.trim(), txtPassword.trim(), txtName.trim(), txtRole.trim());
+
+
+                SwingUtilities.invokeLater(() -> {
+
+                    this.signUp.setText("Sign Up");
+                    this.signUp.setEnabled(true);
+                    this.cancel.setEnabled(true);
+                    this.progressBar.setVisible(false);
+
+                    if(isExist) {
+                        JOptionPane.showMessageDialog(this, "User already exists", "Warning", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+
+                    if(!validateStatus) {
+                        JOptionPane.showMessageDialog(this, "Passwords do not match", "Warning", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+
+                    // 6. INSERT
+                    if( status == 1) {
+                        JOptionPane.showMessageDialog(this, "User Successfully Registered", "Success", JOptionPane.INFORMATION_MESSAGE);
+                        this.dispose();
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Registration Failed", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                });
+            });
+
+            worker.start();
         });
     }
 
